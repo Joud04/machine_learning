@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+corpus/raw/
+data/
+qdrant_storage/
+.pytest_cache/
+server.log
