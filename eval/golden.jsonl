@@ -1,0 +1,10 @@
+{"question": "Quelle distance de similarite est recommandee pour des embeddings normalises dans Qdrant ?", "expected_source": "corpus/seed/fiche_outil_qdrant.html"}
+{"question": "Quel port expose l'image Docker officielle de Qdrant ?", "expected_source": "corpus/seed/fiche_outil_qdrant.html"}
+{"question": "Pourquoi l'assistant a-t-il invente une procedure qui n'existait pas dans le corpus ?", "expected_source": "corpus/seed/incident_2026-02_hallucination.html"}
+{"question": "Quelle mesure a ete mise en place contre les hallucinations sur source absente ?", "expected_source": "corpus/seed/incident_2026-02_hallucination.html"}
+{"question": "Quelle etait la cause du pic de latence de l'assistant RAG en mars 2026 ?", "expected_source": "corpus/seed/incident_2026-03_latence-rag.html"}
+{"question": "Comment le rappel a-t-il evolue chez Banque Alpha apres l'introduction de la recherche vectorielle ?", "expected_source": "corpus/seed/rex_mission_banque-alpha.html"}
+{"question": "Quelle taille de chunk a ameliore la pertinence sur les documents reglementaires denses ?", "expected_source": "corpus/seed/rex_mission_banque-alpha.html"}
+{"question": "Quelles donnees personnelles faut-il anonymiser avant d'indexer un document ?", "expected_source": "corpus/seed/rgpd_anonymisation_corpus.html"}
+{"question": "Quelles sont les contraintes structurantes de l'architecture cible d'AssistKB ?", "expected_source": "corpus/seed/archi_assistkb_v0.html"}
+{"question": "Quelle latence de reponse cible est fixee pour l'assistant interne ?", "expected_source": "corpus/seed/archi_assistkb_v0.html"}
