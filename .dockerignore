@@ -1,0 +1,10 @@
+.venv/
+.git/
+__pycache__/
+*.pyc
+.env
+data/
+corpus/raw/
+qdrant_storage/
+.pytest_cache/
+docs/
