@@ -47,3 +47,41 @@ python -m app.ingest        # -> data/chunks.jsonl (687 chunks)
 python -m app.embed         # vectorisation + indexation
 curl http://localhost:6333/collections/rag_chunks   # points_count = 687
 ```
+
+### Évaluation du retrieval (étapes 9 et 8.1)
+
+**Golden dataset (`eval/golden.jsonl`)** — 10 questions de référence ancrées sur
+le corpus *seed* (déterministe, donc reproductible — contrairement au corpus
+data.gouv qui change à chaque téléchargement). Chaque ligne associe une question
+à la source attendue : `{"question": ..., "expected_source": ...}`.
+
+**Métrique (`eval/recall.py`)** — pour chaque question, on interroge le retrieval
+(sans appel LLM) et on mesure :
+- **recall@k** : la source attendue figure-t-elle dans le top-k ?
+- **MRR** (Mean Reciprocal Rank) : moyenne de `1/rang` de la bonne source.
+
+```bash
+python -m eval.recall 5     # recall@5 = 0.90 (9/10), MRR = 0.900
+```
+
+**Expérimentation top-k (`scripts/experiment.py`, étape 8.1)** — on fait varier k
+pour justifier le choix de `TOP_K` :
+
+| k | recall@k | MRR | latence moy. (ms) |
+|---|----------|-----|-------------------|
+| 1 | 0.90 | 0.900 | 44.0 |
+| 3 | 0.90 | 0.900 | 43.2 |
+| 5 | 0.90 | 0.900 | 41.7 |
+| 10 | 1.00 | 0.914 | 34.5 |
+
+**Lecture des résultats.** La bonne source est presque toujours au **rang 1**
+(recall@1 déjà à 0.90, MRR ≈ 0.90) : le retrieval est précis. Une seule question
+(« latence cible ») n'est rattrapée qu'à un rang profond, d'où le passage de
+recall@5 = 0.90 à recall@10 = 1.00 — mais le MRR ne progresse quasiment pas
+(0.900 → 0.914), signe que ce gain est marginal. **Conclusion : `TOP_K=5` est le
+bon compromis** — au-delà, le recall plafonne tandis que le contexte envoyé au LLM
+grossit (coût et latence de génération en hausse, sans bénéfice de pertinence).
+
+```bash
+python -m scripts.experiment   # tableau comparatif top-k
+```
