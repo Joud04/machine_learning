@@ -5,6 +5,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from app.config import TOP_K, SIM_THRESHOLD
+from app.metrics import log_request
+from app.store import QdrantStore
 from app.retrieve import RetrievalService
 from app.generate import GenerationService, REFUSAL_TEXT
 
@@ -30,6 +32,10 @@ class QueryResponse(BaseModel):
 
 
 app = FastAPI(title="AssistKB Search API")
+
+# Au premier demarrage le volume Qdrant est vierge : on cree la collection
+# (vide) avant d'initialiser le wrapper LangChain, qui exige son existence.
+QdrantStore().ensure_collection()
 
 # Initialize Services
 retriever = RetrievalService()
@@ -78,6 +84,16 @@ async def ask(request: QueryRequest):
             sources = []
 
         latency_ms = int((time.perf_counter() - start_time) * 1000)
+        log_request({
+            "question": request.question,
+            "refused": refused,
+            "best_score": round(best_score, 3),
+            "latency_ms": latency_ms,
+            "input_tokens": usage.get("input_tokens", 0),
+            "output_tokens": usage.get("output_tokens", 0),
+            "top_k": request.k,
+            "threshold": SIM_THRESHOLD,
+        })
         return QueryResponse(
             answer=answer,
             sources=sources,
