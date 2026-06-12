@@ -147,6 +147,24 @@ génération en hausse) sans bénéfice de pertinence.
 limiting du free tier Groq** (attentes avant ré-essai). En usage espacé, la
 latence observée est de 0,4 à 1,3 s par question.
 
+### Test de bout en bout via l'interface web (les 10 questions du golden dataset)
+
+Les 10 questions ont été posées une à une dans l'interface de chat
+(pipeline complet : UI → API → retrieval → seuil → LLM) :
+
+| Résultat | Nombre | Détail |
+|---|---|---|
+| Réponse correcte et sourcée | **8/10** | bonne information, bonne source citée |
+| Refus honnête | 2/10 | « Banque Alpha (rappel) » et « latence cible » |
+| Hallucination | **0/10** | aucune réponse inventée |
+
+Les deux refus ont la même cause, instructive : le **fichier** attendu est bien
+retrouvé (rang 1, score 0.556 pour Banque Alpha), mais le **chunk** qui porte la
+statistique précise (position 1 du document) ne figure pas dans le top-5 — le
+LLM, contraint par le prompt, refuse donc plutôt que d'extrapoler. Le système
+privilégie la fidélité au rappel exhaustif : c'est le comportement voulu
+(zéro hallucination), au prix de deux faux refus.
+
 ### Comportement anti-hallucination (vérifié)
 
 - Question in-corpus (« architecture d'AssistKB v0 ») → réponse sourcée,
@@ -174,6 +192,13 @@ latence observée est de 0,4 à 1,3 s par question.
   téléchargé et indexé depuis la machine hôte vers le Qdrant du compose
   (port 6333 publié) ; l'image ne contient que le corpus seed. Limite assumée
   pour garder une image légère.
+- **Faux refus quand le bon chunk n'est pas dans le top-k.** Sur les 10
+  questions du golden dataset posées de bout en bout, 2 aboutissent à un refus
+  alors que l'information existe : le document attendu est retrouvé, mais pas
+  le chunk précis qui contient la réponse (et le reranking cross-encoder ne le
+  rattrape pas non plus, puisqu'il ne reclasse que les candidats déjà
+  remontés). Pistes : augmenter k côté retrieval avant reranking, ou fusionner
+  les chunks adjacents d'un même document avant l'envoi au LLM.
 - **Évaluation sur le corpus seed uniquement.** Le golden dataset est ancré sur
   les documents seed (déterministes et reproductibles) ; le corpus data.gouv
   change à chaque téléchargement et ne peut pas servir de référence stable.
