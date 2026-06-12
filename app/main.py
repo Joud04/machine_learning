@@ -2,6 +2,8 @@ import time
 from typing import List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app.config import TOP_K, SIM_THRESHOLD
@@ -32,6 +34,13 @@ class QueryResponse(BaseModel):
 
 
 app = FastAPI(title="AssistKB Search API")
+
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+async def read_index():
+    return FileResponse("static/index.html")
 
 # Au premier demarrage le volume Qdrant est vierge : on cree la collection
 # (vide) avant d'initialiser le wrapper LangChain, qui exige son existence.
